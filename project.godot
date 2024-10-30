@@ -18,6 +18,10 @@ config/features=PackedStringArray("4.3", "GL Compatibility")
 
 NetworkManager="*res://network_manager.gd"
 
+[dotnet]
+
+project/assembly_name="ServerTest"
+
 [rendering]
 
 renderer/rendering_method="gl_compatibility"
