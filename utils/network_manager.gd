@@ -2,7 +2,7 @@ extends Node
 
 var references = {}
 
-func registere(_class_name: String, ref: Object) -> void:
+func register(_class_name: String, ref: Object) -> void:
 	references[_class_name] = ref
 
 func handle_request(_class_name: String, function_name: String, args: Array):

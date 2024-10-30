@@ -11,12 +11,14 @@ config_version=5
 [application]
 
 config/name="ServerTest"
-run/main_scene="res://server.tscn"
+run/main_scene="res://main.tscn"
 config/features=PackedStringArray("4.3", "GL Compatibility")
 
 [autoload]
 
-NetworkManager="*res://network_manager.gd"
+NetworkManager="*res://utils/network_manager.gd"
+MyAuthManager="*res://global_server_class/my_auth_manager.gd"
+Server="*res://server.gd"
 
 [dotnet]
 
