@@ -4,8 +4,10 @@ extends Node
 var server = ENetMultiplayerPeer.new()
 
 @rpc("any_peer")
-func handle_request(_class_name: String, function_name: String, args: Array):
-	NetworkManager.handle_request(_class_name, function_name, args)
+func handle_request(request_dict: Dictionary):
+	var request = Request.from_dict(request_dict)
+	NetworkManager.handle_request(request)
+
 
 func create_server():
 	var result = server.create_server(12345)
@@ -37,14 +39,14 @@ func _on_player_disconnected(peer_id):
 func client_chat_callback(peer_id: int, message: String):
 	var key = MyAuthManager.get_login_by_peer_id(peer_id)
 	var msg = "Сообщение от клиента " + str(key) + " : " + message
-	rpc("handle_request", "Lobby", "write_in_chat", [msg])
+	var request = Request.new("Lobby", "write_in_chat", [msg])
+	rpc_on_client(peer_id, request)
 
 
+func rpc_on_client(id, request: Request):
+	rpc_id(id, "handle_request", request.to_dict())
 
-func server_here(id, login):
-	rpc_id(id, "handle_request", "Auth", "server_here", [login])
 
-func show_error(id):
-	rpc_id(id, "handle_request", "Auth", "show_error", [])
-
-	
+func pong(id, request_time, _class_name, _func_name):
+	var request = Request.new(_class_name, _func_name, [request_time])
+	rpc_on_client(id, request)
