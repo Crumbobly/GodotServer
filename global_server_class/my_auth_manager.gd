@@ -51,19 +51,24 @@ func load_accounts():
 
 
 func login(id, login, password):
+	
 	if(auth_players.has(login)):
 		if(auth_players[login] == password)	:
 			connected_players[login] = id
-			Server.server_here(id, login)
-			return 
-			
-	Server.show_error(id)
+			var request = Request.new("Auth", "server_here", [login])
+			Server.rpc_on_client(id, request)
+			return
+	
+	var request = Request.new("Auth", "show_error", [])
+	Server.rpc_on_client(id, request)
+	
 
 
 func register(id, login, password):
 	auth_players[login] = password
 	connected_players[login] = id
 	add_new_account(login, password)
-	Server.show_error(id)
+	var request = Request.new("Auth", "server_here", [login])
+	Server.rpc_on_client(id, request)
 	
 	
