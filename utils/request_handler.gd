@@ -1,4 +1,5 @@
-extends Node
+extends Object
+class_name RequestHandler
 
 var references = {}
 
@@ -6,7 +7,6 @@ func register(_class_name: String, ref: Object) -> void:
 	references[_class_name] = ref
 
 func handle_request(request: Request):
-
 	var _class_name = request.scene_class_name
 	var function_name = request.func_name
 	var args = request.args

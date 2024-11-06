@@ -1,9 +1,13 @@
-extends Node
-
+extends Object
+class_name MyAuthManager
 
 var auth_players : Dictionary = {"login" : "password"}
 var connected_players : Dictionary = {"login" : "peer_id"}
+var server: Server
 
+func _init(_server) -> void:
+	server = _server
+	load_accounts()
 
 func login_is_exist(login: String):
 	return auth_players.keys().find(login) != -1
@@ -16,12 +20,6 @@ func get_login_by_peer_id(peer_id):
 
 func player_discconect(peer_id):
 	connected_players.erase(get_login_by_peer_id(peer_id))
-
-
-func _ready() -> void:
-	load_accounts()
-	NetworkManager.register("Auth", self)
-
 
 func add_new_account(login, password):
 	var file = FileAccess.open("res://save.dat" , FileAccess.WRITE)
@@ -56,11 +54,11 @@ func login(id, login, password):
 		if(auth_players[login] == password)	:
 			connected_players[login] = id
 			var request = Request.new("Auth", "server_here", [login])
-			Server.rpc_on_client(id, request)
+			server.rpc_on_client(id, request)
 			return
 	
 	var request = Request.new("Auth", "show_error", [])
-	Server.rpc_on_client(id, request)
+	server.rpc_on_client(id, request)
 	
 
 
@@ -69,6 +67,6 @@ func register(id, login, password):
 	connected_players[login] = id
 	add_new_account(login, password)
 	var request = Request.new("Auth", "server_here", [login])
-	Server.rpc_on_client(id, request)
+	server.rpc_on_client(id, request)
 	
 	

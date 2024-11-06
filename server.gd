@@ -1,14 +1,26 @@
 extends Node
+class_name Server
 
 #######################
 var server = ENetMultiplayerPeer.new()
+var request_handler = RequestHandler.new()
+var my_auth_manager: MyAuthManager
+var lobby_manager: LobbyManager
+var game_manager: GameManager
 
-@rpc("any_peer")
-func handle_request(request_dict: Dictionary):
-	var request = Request.from_dict(request_dict)
-	NetworkManager.handle_request(request)
 
-
+func _ready() -> void:
+	create_server()
+	request_handler.register("Server", self)
+	
+	my_auth_manager = MyAuthManager.new(self)
+	lobby_manager = LobbyManager.new(self)
+	game_manager = GameManager.new(self)
+	request_handler.register("Auth", my_auth_manager)
+	request_handler.register("Lobby", lobby_manager)
+	request_handler.register("Game", game_manager)
+	
+	
 func create_server():
 	var result = server.create_server(12345)
 	if result != OK:
@@ -20,27 +32,22 @@ func create_server():
 	multiplayer.peer_connected.connect(_on_player_connected)
 	multiplayer.peer_disconnected.connect(_on_player_disconnected)
 
-func _ready() -> void:
-	create_server()
-	NetworkManager.register("Server", self)
-#######################
 
+@rpc("any_peer")
+func handle_request(request_dict: Dictionary):
+	var request = Request.from_dict(request_dict)
+	request_handler.handle_request(request)
+
+#######################
 
 func _on_player_connected(peer_id):
 	print_debug("Игрок подключился с ID:", peer_id)
 
 
 func _on_player_disconnected(peer_id):
-	var key = MyAuthManager.get_login_by_peer_id(peer_id)
-	MyAuthManager.player_discconect(peer_id)
+	var key = my_auth_manager.get_login_by_peer_id(peer_id)
+	my_auth_manager.player_discconect(peer_id)
 	print_debug("Игрок отключился с ID:", peer_id)
-
-
-func client_chat_callback(peer_id: int, message: String):
-	var key = MyAuthManager.get_login_by_peer_id(peer_id)
-	var msg = "Сообщение от клиента " + str(key) + " : " + message
-	var request = Request.new("Lobby", "write_in_chat", [msg])
-	rpc_on_client(peer_id, request)
 
 
 func rpc_on_client(id, request: Request):
