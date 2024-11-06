@@ -33,9 +33,7 @@ func get_opponent(id):
 func add_waiting_player(id):
 	if id not in waiting_list:
 		waiting_list.append(id)
-	else:
-		assert(false, "Попытка добавить уже добавленного игрока в waiting_list")
-	
+
 	create_room()
 		
 		

@@ -50,23 +50,37 @@ func load_accounts():
 
 func login(id, login, password):
 	
+	var error_msg = "Неверный логин или пароль"
+	
 	if(auth_players.has(login)):
-		if(auth_players[login] == password)	:
+		
+		if connected_players.has(login):
+			error_msg = "Вход в аккаунт уже был произведён"
+		
+		elif(auth_players[login] == password)	:
 			connected_players[login] = id
 			var request = Request.new("Auth", "server_here", [login])
 			server.rpc_on_client(id, request)
 			return
 	
-	var request = Request.new("Auth", "show_error", [])
+	var request = Request.new("Auth", "set_error_lbl_text", [error_msg])
 	server.rpc_on_client(id, request)
 	
 
 
 func register(id, login, password):
-	auth_players[login] = password
-	connected_players[login] = id
-	add_new_account(login, password)
-	var request = Request.new("Auth", "server_here", [login])
+	
+	var error_msg = "Логин занят"
+		
+	if not auth_players.has(login):
+		auth_players[login] = password
+		connected_players[login] = id
+		add_new_account(login, password)
+		var request = Request.new("Auth", "server_here", [login])
+		server.rpc_on_client(id, request)
+		return
+	
+	var request = Request.new("Auth", "set_error_lbl_text", [error_msg])
 	server.rpc_on_client(id, request)
 	
 	
